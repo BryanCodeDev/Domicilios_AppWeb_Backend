@@ -21,15 +21,13 @@ const OrderItem = sequelize.define('OrderItem', {
   cantidad: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    defaultValue: 1,
     validate: { min: 1 }
   },
   precio_unitario: {
     type: DataTypes.DECIMAL(12, 2),
-    allowNull: false
-  },
-  subtotal: {
-    type: DataTypes.DECIMAL(12, 2),
-    allowNull: false
+    allowNull: false,
+    validate: { min: 0 }
   }
 }, {
   tableName: 'order_items',

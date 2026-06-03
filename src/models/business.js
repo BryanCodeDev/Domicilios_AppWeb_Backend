@@ -10,7 +10,6 @@ const Business = sequelize.define('Business', {
   user_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    unique: true,
     references: { model: 'users', key: 'id' },
     onDelete: 'CASCADE'
   },
@@ -18,15 +17,27 @@ const Business = sequelize.define('Business', {
     type: DataTypes.STRING(150),
     allowNull: false
   },
+  descripcion: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
   categoria: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.STRING(80),
     allowNull: false
   },
   direccion: {
     type: DataTypes.TEXT,
+    allowNull: false
+  },
+  lat: {
+    type: DataTypes.DECIMAL(10, 7),
     allowNull: true
   },
-  descripcion: {
+  lng: {
+    type: DataTypes.DECIMAL(10, 7),
+    allowNull: true
+  },
+  logo_url: {
     type: DataTypes.TEXT,
     allowNull: true
   },
@@ -34,22 +45,17 @@ const Business = sequelize.define('Business', {
     type: DataTypes.STRING(100),
     allowNull: true
   },
-  imagen_url: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  calificacion_promedio: {
-    type: DataTypes.DECIMAL(3, 2),
+  activo: {
+    type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: 5.00,
-    validate: { min: 0, max: 5 }
+    defaultValue: true
   }
 }, {
   tableName: 'businesses',
   timestamps: true,
   underscored: true,
   indexes: [
-    { fields: ['user_id'], unique: true },
+    { fields: ['user_id'] },
     { fields: ['categoria'] }
   ]
 });

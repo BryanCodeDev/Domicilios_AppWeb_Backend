@@ -8,20 +8,21 @@ const User = sequelize.define('User', {
     defaultValue: DataTypes.UUIDV4
   },
   nombre: {
-    type: DataTypes.STRING(150),
+    type: DataTypes.STRING(100),
     allowNull: false
   },
   email: {
     type: DataTypes.STRING(150),
     allowNull: false,
-    unique: true
+    unique: true,
+    validate: { isEmail: true }
   },
   password_hash: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.TEXT,
     allowNull: false
   },
   rol: {
-    type: DataTypes.ENUM('cliente', 'negocio', 'repartidor', 'admin'),
+    type: DataTypes.ENUM('admin', 'cliente', 'repartidor', 'negocio'),
     allowNull: false
   },
   phone: {
@@ -32,37 +33,41 @@ const User = sequelize.define('User', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  activo: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
   fcm_token: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.TEXT,
     allowNull: true
   },
   reset_token: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.TEXT,
     allowNull: true
   },
   reset_token_expiry: {
     type: DataTypes.DATE,
     allowNull: true
-  },
-  activo: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: true
   }
 }, {
   tableName: 'users',
   timestamps: true,
-  underscored: true
+  underscored: true,
+  indexes: [
+    { fields: ['email'] },
+    { fields: ['rol'] }
+  ]
 });
 
 User.associate = (models) => {
-  User.hasOne(models.Business, { foreignKey: 'user_id', as: 'business' });
+  User.hasMany(models.Order, { foreignKey: 'cliente_id', as: 'ordersAsClient' });
+  User.hasMany(models.Order, { foreignKey: 'repartidor_id', as: 'ordersAsRider' });
+  User.hasMany(models.Delivery, { foreignKey: 'repartidor_id', as: 'deliveries' });
+  User.hasMany(models.Rating, { foreignKey: 'from_user_id', as: 'ratingsGiven' });
+  User.hasMany(models.Rating, { foreignKey: 'to_user_id', as: 'ratingsReceived' });
   User.hasOne(models.RiderProfile, { foreignKey: 'user_id', as: 'riderProfile' });
-  User.hasMany(models.Order, { foreignKey: 'cliente_id', as: 'clientOrders' });
-  User.hasMany(models.Order, { foreignKey: 'repartidor_id', as: 'riderOrders' });
-  User.hasMany(models.Commission, { foreignKey: 'repartidor_id', as: 'commissions' });
-  User.hasMany(models.Rating, { foreignKey: 'from_user_id', as: 'givenRatings' });
-  User.hasMany(models.Rating, { foreignKey: 'to_user_id', as: 'receivedRatings' });
+  User.hasOne(models.Business, { foreignKey: 'user_id', as: 'business' });
 };
 
 module.exports = User;
