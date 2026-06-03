@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { initSocket } = require('./sockets/tracking');
 const errorHandler = require('./middlewares/errorHandler');
+const { sequelize } = require('./models');
 
 dotenv.config();
 
@@ -13,6 +14,10 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: process.env.FRONTEND_URL || '*', methods: ['GET', 'POST'] }
 });
+
+sequelize.authenticate()
+  .then(() => console.log('✓ Database connected'))
+  .catch(err => console.error('✗ Database connection error:', err.message));
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
