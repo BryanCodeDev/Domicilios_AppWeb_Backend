@@ -27,8 +27,8 @@ const createOrder = asyncHandler(async (req, res) => {
   });
   await OrderItem.bulkCreate(orderItemsData.map(oi => ({ ...oi, order_id: order.id })));
   const orderWithItems = await Order.findByPk(order.id, { include: [{ model: OrderItem, as: 'orderItems' }, { model: Business, as: 'business', include: [{ model: User, as: 'user', attributes: ['id', 'nombre', 'phone'] }] }] });
-  const io = req.app.get('io');
-  io.to(`business:${business.user_id}`).emit('new_order', { order: orderWithItems });
+  const io = req.app.get('tracking') || req.app.get('io');
+  io.to(`business:${business.user_id}`).emit('order:new', orderWithItems);
   res.status(201).json({ order: orderWithItems });
 });
 
