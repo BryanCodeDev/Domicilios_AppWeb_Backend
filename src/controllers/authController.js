@@ -10,7 +10,8 @@ const generateToken = (user) => {
 };
 
 const generateRefreshToken = (user) => {
-  const payload = { id: user.id, token: bcrypt.randomBytes(32).toString('hex') };
+  const crypto = require('crypto');
+  const payload = { id: user.id, token: crypto.randomBytes(32).toString('hex') };
   return jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 };
 
@@ -33,13 +34,21 @@ const register = asyncHandler(async (req, res) => {
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+  console.log('Login attempt:', email);
   const user = await User.findOne({ where: { email } });
+  console.log('User found:', user ? 'yes' : 'no');
   if (!user) throw new AppError('Credenciales inválidas', 401);
+  console.log('Password hash exists:', !!user.password_hash);
+  console.log('Password input:', password);
   const valid = await bcrypt.compare(password, user.password_hash);
+  console.log('Password valid:', valid);
   if (!valid) throw new AppError('Credenciales inválidas', 401);
   if (!user.activo) throw new AppError('Usuario inactivo. Contacte al administrador', 403);
+  console.log('Activo:', user.activo);
   const token = generateToken(user);
+  console.log('Token generated');
   const refreshToken = generateRefreshToken(user);
+  console.log('Refresh token generated');
   res.json({ success: true, token, refreshToken, user: { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol } });
 });
 
@@ -77,7 +86,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ where: { email } });
   if (!user) return res.json({ success: true, message: 'Si el email existe, se envió un correo de recuperación' });
-  const resetToken = bcrypt.randomBytes(32).toString('hex');
+  const crypto = require('crypto');
+  const resetToken = crypto.randomBytes(32).toString('hex');
   const resetTokenExpiry = new Date(Date.now() + 3600000);
   await user.update({ reset_token: resetToken, reset_token_expiry: resetTokenExpiry });
   console.log(`Password reset token for ${email}: ${resetToken}`);
