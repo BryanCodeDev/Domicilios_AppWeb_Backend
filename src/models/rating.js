@@ -37,7 +37,7 @@ const Rating = sequelize.define('Rating', {
   }
 }, {
   tableName: 'ratings',
-  timestamps: true,
+  timestamps: false,
   underscored: true,
   indexes: [
     { fields: ['order_id'] },

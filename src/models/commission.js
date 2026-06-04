@@ -49,7 +49,7 @@ const Commission = sequelize.define('Commission', {
   }
 }, {
   tableName: 'commissions',
-  timestamps: true,
+  timestamps: false,
   underscored: true,
   indexes: [
     { fields: ['order_id'] },

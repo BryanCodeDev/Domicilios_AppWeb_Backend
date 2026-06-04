@@ -34,7 +34,7 @@ const Payment = sequelize.define('Payment', {
   }
 }, {
   tableName: 'payments',
-  timestamps: true,
+  timestamps: false,
   underscored: true,
   indexes: [
     { fields: ['order_id'], unique: true },

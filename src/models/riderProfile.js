@@ -48,7 +48,7 @@ const RiderProfile = sequelize.define('RiderProfile', {
   }
 }, {
   tableName: 'rider_profiles',
-  timestamps: true,
+  timestamps: false,
   underscored: true,
   indexes: [
     { fields: ['user_id'], unique: true },

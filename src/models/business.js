@@ -52,7 +52,7 @@ const Business = sequelize.define('Business', {
   }
 }, {
   tableName: 'businesses',
-  timestamps: true,
+  timestamps: false,
   underscored: true,
   indexes: [
     { fields: ['user_id'] },

@@ -37,7 +37,7 @@ const Product = sequelize.define('Product', {
   }
 }, {
   tableName: 'products',
-  timestamps: true,
+  timestamps: false,
   underscored: true,
   indexes: [
     { fields: ['business_id'] }

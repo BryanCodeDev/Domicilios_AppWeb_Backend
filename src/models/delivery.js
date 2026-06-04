@@ -33,7 +33,7 @@ const Delivery = sequelize.define('Delivery', {
   }
 }, {
   tableName: 'deliveries',
-  timestamps: true,
+  timestamps: false,
   underscored: true,
   indexes: [
     { fields: ['order_id'], unique: true },
