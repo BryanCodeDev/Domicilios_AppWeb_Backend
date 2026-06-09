@@ -1,5 +1,5 @@
 const { Business, User, Product } = require('../models');
-const { AppError, asyncHandler } = require('../utils/AppError');
+const { asyncHandler } = require('../utils/AppError');
 
 const getUserBusiness = asyncHandler(async (req, res) => {
   const business = await Business.findOne({ where: { user_id: req.user.id } });
@@ -87,3 +87,4 @@ module.exports = {
   getBusinesses,
   getBusinessById
 };
+

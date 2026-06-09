@@ -1,5 +1,13 @@
-const errorHandler = (err, req, res, next) => {
-  console.error('ErrorHandler:', err.name, err.message, err.stack?.split('\n').slice(0, 2).join('\n'));
+const logger = require('../utils/logger');
+
+const errorHandler = (err, req, res, _next) => {
+  logger.error({
+    message: err.message,
+    stack: err.stack,
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip
+  });
 
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
@@ -24,3 +32,4 @@ const errorHandler = (err, req, res, next) => {
 };
 
 module.exports = errorHandler;
+

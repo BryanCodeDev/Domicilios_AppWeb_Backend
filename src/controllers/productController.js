@@ -1,5 +1,5 @@
 const { Product, Business } = require('../models');
-const { validate, schemas } = require('../middlewares/validate');
+const { schemas } = require('../middlewares/validate');
 const { AppError, asyncHandler } = require('../utils/AppError');
 
 const createProduct = asyncHandler(async (req, res) => {
@@ -41,3 +41,4 @@ const getProductsByBusiness = asyncHandler(async (req, res) => {
 });
 
 module.exports = { createProduct, updateProduct, deleteProduct, getProductsByBusiness };
+

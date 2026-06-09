@@ -12,7 +12,7 @@ const authenticate = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded.user;
     next();
-  } catch (err) {
+  } catch {
     throw new AppError('Token is not valid', 401);
   }
 };
@@ -38,10 +38,11 @@ const optionalAuth = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded.user;
-  } catch (err) {
+  } catch {
     // ignore invalid token for optional auth
   }
   next();
 };
 
 module.exports = { authenticate, authorize, optionalAuth };
+

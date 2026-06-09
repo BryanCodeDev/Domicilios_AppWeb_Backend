@@ -1,4 +1,4 @@
-const { RiderProfile, User, Commission, Order } = require('../models');
+const { RiderProfile, Commission, Order } = require('../models');
 const { AppError, asyncHandler } = require('../utils/AppError');
 
 const getRiderProfile = asyncHandler(async (req, res) => {
@@ -15,10 +15,10 @@ const updateAvailability = asyncHandler(async (req, res) => {
 });
 
 const getEarnings = asyncHandler(async (req, res) => {
-  const { periodo } = req.query;
   let where = { repartidor_id: req.user.id, estado: 'PAGADO' };
   const commissions = await Commission.findAll({ where, include: [{ model: Order, as: 'order', attributes: ['created_at'] }] });
   res.json({ commissions });
 });
 
 module.exports = { getRiderProfile, updateAvailability, getEarnings };
+

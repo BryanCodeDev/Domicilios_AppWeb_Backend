@@ -1,5 +1,5 @@
-const { Rating, User, Order } = require('../models');
-const { validate, schemas } = require('../middlewares/validate');
+const { Rating, Order } = require('../models');
+const { schemas } = require('../middlewares/validate');
 const { AppError, asyncHandler } = require('../utils/AppError');
 
 const createRating = asyncHandler(async (req, res) => {
@@ -15,7 +15,7 @@ const createRating = asyncHandler(async (req, res) => {
   res.status(201).json({ rating });
 });
 
-const updateAverageRating = async (userId, rol, newScore) => {
+const updateAverageRating = async (userId, rol) => {
   const ratings = await Rating.findAll({ where: { to_user_id: userId, rol_calificado: rol } });
   const avg = ratings.reduce((sum, r) => sum + r.puntaje, 0) / ratings.length;
   if (rol === 'negocio') {
@@ -26,3 +26,4 @@ const updateAverageRating = async (userId, rol, newScore) => {
 };
 
 module.exports = { createRating };
+

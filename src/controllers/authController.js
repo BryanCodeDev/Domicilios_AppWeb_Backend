@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User, Business, RiderProfile } = require('../models');
-const { validate, schemas } = require('../middlewares/validate');
 const { AppError, asyncHandler } = require('../utils/AppError');
+const logger = require('../utils/logger');
 
 const generateToken = (user) => {
   const payload = { user: { id: user.id, rol: user.rol, email: user.email } };
@@ -29,26 +29,20 @@ const register = asyncHandler(async (req, res) => {
   }
   const token = generateToken(user);
   const refreshToken = generateRefreshToken(user);
+  logger.info({ message: 'User registered', userId: user.id, email });
   res.status(201).json({ success: true, token, refreshToken, user: { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol } });
 });
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  console.log('Login attempt:', email);
   const user = await User.findOne({ where: { email } });
-  console.log('User found:', user ? 'yes' : 'no');
-  if (!user) throw new AppError('Credenciales inválidas', 401);
-  console.log('Password hash exists:', !!user.password_hash);
-  console.log('Password input:', password);
+  if (!user) throw new AppError('Credenciales invalidas', 401);
   const valid = await bcrypt.compare(password, user.password_hash);
-  console.log('Password valid:', valid);
-  if (!valid) throw new AppError('Credenciales inválidas', 401);
+  if (!valid) throw new AppError('Credenciales invalidas', 401);
   if (!user.activo) throw new AppError('Usuario inactivo. Contacte al administrador', 403);
-  console.log('Activo:', user.activo);
   const token = generateToken(user);
-  console.log('Token generated');
   const refreshToken = generateRefreshToken(user);
-  console.log('Refresh token generated');
+  logger.info({ message: 'User logged in', userId: user.id });
   res.json({ success: true, token, refreshToken, user: { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol } });
 });
 
@@ -63,45 +57,51 @@ const getProfile = asyncHandler(async (req, res) => {
 });
 
 const refreshToken = asyncHandler(async (req, res) => {
-  const { refreshToken } = req.body;
-  if (!refreshToken) throw new AppError('Refresh token requerido', 401);
+  const { refreshToken: refresh } = req.body;
+  if (!refresh) throw new AppError('Refresh token requerido', 401);
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(refresh, process.env.JWT_REFRESH_SECRET);
     const user = await User.findByPk(decoded.id);
     if (!user) throw new AppError('Usuario no encontrado', 404);
     const token = generateToken(user);
     res.json({ success: true, token });
-  } catch (err) {
-    throw new AppError('Refresh token inválido', 401);
+  } catch {
+    throw new AppError('Refresh token invalido', 401);
   }
 });
 
 const registerFcmToken = asyncHandler(async (req, res) => {
   const { fcm_token } = req.body;
+  if (fcm_token && fcm_token.length > 500) {
+    throw new AppError('FCM token demasiado largo', 400);
+  }
   await User.update({ fcm_token }, { where: { id: req.user.id } });
+  logger.info({ message: 'FCM token updated', userId: req.user.id });
   res.json({ success: true, message: 'FCM token registrado' });
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ where: { email } });
-  if (!user) return res.json({ success: true, message: 'Si el email existe, se envió un correo de recuperación' });
+  if (!user) return res.json({ success: true, message: 'Si el email existe, se envio un correo de recuperacion' });
   const crypto = require('crypto');
   const resetToken = crypto.randomBytes(32).toString('hex');
   const resetTokenExpiry = new Date(Date.now() + 3600000);
   await user.update({ reset_token: resetToken, reset_token_expiry: resetTokenExpiry });
-  console.log(`Password reset token for ${email}: ${resetToken}`);
-  res.json({ success: true, message: 'Si el email existe, se envió un correo de recuperación' });
+  logger.info({ message: 'Password reset requested', email });
+  res.json({ success: true, message: 'Si el email existe, se envio un correo de recuperacion' });
 });
 
 const resetPassword = asyncHandler(async (req, res) => {
   const { token, newPassword } = req.body;
-   const { Op } = require('sequelize');
+  const { Op } = require('sequelize');
   const user = await User.findOne({ where: { reset_token: token, reset_token_expiry: { [Op.gt]: new Date() } } });
-  if (!user) throw new AppError('Token inválido o expirado', 400);
+  if (!user) throw new AppError('Token invalido o expirado', 400);
   const passwordHash = await bcrypt.hash(newPassword, 10);
   await user.update({ password_hash: passwordHash, reset_token: null, reset_token_expiry: null });
-  res.json({ success: true, message: 'Contraseña actualizada' });
+  logger.info({ message: 'Password reset successful', userId: user.id });
+  res.json({ success: true, message: 'Contrasena actualizada' });
 });
 
 module.exports = { register, login, getProfile, refreshToken, registerFcmToken, forgotPassword, resetPassword };
+

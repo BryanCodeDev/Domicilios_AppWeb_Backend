@@ -2,7 +2,6 @@ const { Op } = require('sequelize');
 const { Order, Delivery, RiderProfile, User, Commission } = require('../models');
 
 const RIDER_RADIUS_KM = 5;
-const BUSINESS_RADIUS_KM = 3;
 
 const findNearestRider = async (lat, lng) => {
   const riders = await User.findAll({
@@ -36,7 +35,7 @@ const createDeliveryForOrder = async (order) => {
     estado: 'assigned'
   });
 
-  await order.update({ repartidor_id: rider.id, estado: 'DELIVERED' });
+  await order.update({ repartidor_id: rider.id, estado: 'ASSIGNED' });
 
   return delivery;
 };
@@ -44,7 +43,7 @@ const createDeliveryForOrder = async (order) => {
 const completeDelivery = async (order) => {
   await order.update({ estado: 'DELIVERED' });
   const total = Number(order.total);
-  const commission = await Commission.create({
+  await Commission.create({
     order_id: order.id,
     business_id: order.business_id,
     repartidor_id: order.repartidor_id,
@@ -55,6 +54,7 @@ const completeDelivery = async (order) => {
     estado: 'PENDIENTE'
   });
 
+  const commission = await Commission.findOne({ where: { order_id: order.id } });
   return commission;
 };
 
@@ -88,3 +88,4 @@ const haversineKm = (lat1, lon1, lat2, lon2) => {
 };
 
 module.exports = { findNearestRider, createDeliveryForOrder, completeDelivery, getRiderEarnings };
+

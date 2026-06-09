@@ -52,6 +52,7 @@ const Order = sequelize.define('Order', {
   tableName: 'orders',
   timestamps: true,
   underscored: true,
+  paranoid: true,
   indexes: [
     { fields: ['cliente_id'] },
     { fields: ['repartidor_id'] },
@@ -72,3 +73,4 @@ Order.associate = (models) => {
 };
 
 module.exports = Order;
+

@@ -54,6 +54,7 @@ const User = sequelize.define('User', {
   tableName: 'users',
   timestamps: true,
   underscored: true,
+  paranoid: true,
   indexes: [
     { fields: ['email'] },
     { fields: ['rol'] }
@@ -71,3 +72,4 @@ User.associate = (models) => {
 };
 
 module.exports = User;
+
